@@ -4,7 +4,6 @@ const { authenticateToken, handleError } = require('../utils/helpers');
 
 const router = express.Router();
 
-// Create new order
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -18,7 +17,6 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Shipping address is required' });
     }
 
-    // Validate and calculate total
     let total = 0;
     const orderItems = [];
 
@@ -45,7 +43,6 @@ router.post('/', authenticateToken, async (req, res) => {
       });
     }
 
-    // Create order
     const order = {
       userId: new ObjectId(req.user.userId),
       items: orderItems,
@@ -59,7 +56,6 @@ router.post('/', authenticateToken, async (req, res) => {
 
     const result = await db.collection('orders').insertOne(order);
 
-    // Clear user's cart after successful order
     await db.collection('users').updateOne(
       { _id: new ObjectId(req.user.userId) },
       { $set: { cart: [] } }
@@ -75,7 +71,6 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
-// Get user's orders
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -111,7 +106,6 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
-// Get specific order
 router.get('/:orderId', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -136,7 +130,6 @@ router.get('/:orderId', authenticateToken, async (req, res) => {
   }
 });
 
-// Cancel order (only if status is 'pending')
 router.put('/:orderId/cancel', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
