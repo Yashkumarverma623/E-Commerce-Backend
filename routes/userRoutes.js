@@ -4,13 +4,12 @@ const { authenticateToken, handleError } = require('../utils/helpers');
 
 const router = express.Router();
 
-// Get user profile
 router.get('/profile', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
     const user = await db.collection('users').findOne(
       { _id: new ObjectId(req.user.userId) },
-      { projection: { password: 0 } } // Exclude password from response
+      { projection: { password: 0 } } 
     );
 
     if (!user) {
@@ -23,7 +22,6 @@ router.get('/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// Update user profile
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -38,7 +36,6 @@ router.put('/profile', authenticateToken, async (req, res) => {
     if (email) updateData.email = email;
     updateData.updatedAt = new Date();
 
-    // If email is being updated, check if it's already taken
     if (email) {
       const existingUser = await db.collection('users').findOne({ 
         email, 
@@ -64,7 +61,6 @@ router.put('/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// Get user's order history
 router.get('/orders', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -79,16 +75,13 @@ router.get('/orders', authenticateToken, async (req, res) => {
   }
 });
 
-// Delete user account
 router.delete('/account', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
     const userId = new ObjectId(req.user.userId);
 
-    // Delete user's orders
     await db.collection('orders').deleteMany({ userId });
     
-    // Delete user account
     const result = await db.collection('users').deleteOne({ _id: userId });
 
     if (result.deletedCount === 0) {
