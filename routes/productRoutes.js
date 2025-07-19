@@ -5,7 +5,6 @@ const { authenticateToken } = require('../auth/auth'); // Assuming you have auth
 
 const router = express.Router();
 
-// Get all products with filtering and pagination
 router.get('/', async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -23,7 +22,6 @@ router.get('/', async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const query = {};
 
-    // Build query filters
     if (category) query.category = category;
     if (minPrice || maxPrice) {
       query.price = {};
@@ -34,7 +32,6 @@ router.get('/', async (req, res) => {
       query.$text = { $search: search };
     }
 
-    // Build sort object
     const sort = {};
     sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
@@ -61,7 +58,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Create new product (POST)
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -77,7 +73,6 @@ router.post('/', authenticateToken, async (req, res) => {
       dimensions
     } = req.body;
 
-    // Validation
     if (!name || !description || !price || !category || stock === undefined) {
       return res.status(400).json({ 
         error: 'Name, description, price, category, and stock are required' 
@@ -96,7 +91,6 @@ router.post('/', authenticateToken, async (req, res) => {
       });
     }
 
-    // Valid categories (should match frontend)
     const validCategories = [
       'electronics', 'clothing', 'books', 'home', 'sports', 
       'beauty', 'toys', 'automotive', 'jewelry', 'food'
@@ -108,7 +102,6 @@ router.post('/', authenticateToken, async (req, res) => {
       });
     }
 
-    // Create product object
     const product = {
       name: name.trim(),
       description: description.trim(),
@@ -117,15 +110,13 @@ router.post('/', authenticateToken, async (req, res) => {
       stock: parseInt(stock),
       createdAt: new Date(),
       updatedAt: new Date(),
-      createdBy: req.user.id // From auth middleware
+      createdBy: req.user.id 
     };
 
-    // Add optional fields if provided
     if (image) product.image = image.trim();
     if (brand) product.brand = brand.trim();
     if (weight) product.weight = parseFloat(weight);
     
-    // Handle dimensions
     if (dimensions) {
       const dims = {};
       if (dimensions.length) dims.length = parseFloat(dimensions.length);
@@ -137,11 +128,9 @@ router.post('/', authenticateToken, async (req, res) => {
       }
     }
 
-    // Insert product into database
     const result = await db.collection('products').insertOne(product);
     
     if (result.insertedId) {
-      // Return the created product with its ID
       const createdProduct = { ...product, _id: result.insertedId };
       res.status(201).json(createdProduct);
     } else {
@@ -153,7 +142,6 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
-// Get single product by ID
 router.get('/:id', async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -175,7 +163,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Update product (PUT)
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -197,7 +184,6 @@ router.put('/:id', authenticateToken, async (req, res) => {
       dimensions
     } = req.body;
 
-    // Build update object
     const updateData = {
       updatedAt: new Date()
     };
@@ -234,7 +220,6 @@ router.put('/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// Delete product (DELETE)
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -256,7 +241,6 @@ router.delete('/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// Get products by category
 router.get('/category/:category', async (req, res) => {
   try {
     const db = req.app.locals.db;
