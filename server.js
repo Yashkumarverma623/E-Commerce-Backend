@@ -13,6 +13,25 @@ const wishlistRoutes = require(path.join(__dirname, 'routes', 'wishlistRoutes'))
 const orderRoutes = require(path.join(__dirname, 'routes', 'orderRoutes'));
 const userRoutes = require(path.join(__dirname, 'routes', 'userRoutes'));
 
+const corsOptions = {
+  origin: [
+    'https://e-commerce-frontend-zeta-lake.vercel.app',
+    'https://e-commerce-backend-3bfg.onrender.com',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:4173', 
+  ],
+  credentials: true, 
+  optionsSuccessStatus: 200, 
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin'
+  ]
+};
 const app = express();
 const PORT = process.env.PORT || 3000;
 
