@@ -4,7 +4,6 @@ const { authenticateToken, handleError } = require('../utils/helpers');
 
 const router = express.Router();
 
-// Get user's wishlist
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -17,7 +16,6 @@ router.get('/', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Populate wishlist with product details
     const wishlistItems = [];
     if (user.wishlist && user.wishlist.length > 0) {
       for (const productId of user.wishlist) {
@@ -34,7 +32,6 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
-// Add item to wishlist
 router.post('/add/:productId', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -44,13 +41,11 @@ router.post('/add/:productId', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Invalid product ID' });
     }
 
-    // Check if product exists
     const product = await db.collection('products').findOne({ _id: new ObjectId(productId) });
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    // Check if already in wishlist
     const user = await db.collection('users').findOne({ _id: new ObjectId(req.user.userId) });
     if (user.wishlist?.includes(productId)) {
       return res.status(400).json({ error: 'Product already in wishlist' });
@@ -67,7 +62,6 @@ router.post('/add/:productId', authenticateToken, async (req, res) => {
   }
 });
 
-// Remove item from wishlist
 router.delete('/remove/:productId', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -92,7 +86,6 @@ router.delete('/remove/:productId', authenticateToken, async (req, res) => {
   }
 });
 
-// Clear entire wishlist
 router.delete('/clear', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
