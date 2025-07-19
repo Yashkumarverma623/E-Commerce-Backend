@@ -4,7 +4,6 @@ const { authenticateToken, handleError } = require('../utils/helpers');
 
 const router = express.Router();
 
-// Get user's cart
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -17,7 +16,6 @@ router.get('/', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Populate cart items with product details
     const cartItems = [];
     if (user.cart && user.cart.length > 0) {
       for (const item of user.cart) {
@@ -38,7 +36,6 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
-// Add item to cart
 router.post('/add', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -52,24 +49,20 @@ router.post('/add', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Invalid product ID' });
     }
 
-    // Check if product exists
     const product = await db.collection('products').findOne({ _id: new ObjectId(productId) });
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    // Check if item already in cart
     const user = await db.collection('users').findOne({ _id: new ObjectId(req.user.userId) });
     const existingItemIndex = user.cart?.findIndex(item => item.productId === productId);
 
     if (existingItemIndex >= 0) {
-      // Update quantity
       await db.collection('users').updateOne(
         { _id: new ObjectId(req.user.userId) },
         { $inc: { [`cart.${existingItemIndex}.quantity`]: parseInt(quantity) } }
       );
     } else {
-      // Add new item
       await db.collection('users').updateOne(
         { _id: new ObjectId(req.user.userId) },
         { 
@@ -90,7 +83,6 @@ router.post('/add', authenticateToken, async (req, res) => {
   }
 });
 
-// Update cart item quantity
 router.put('/update/:productId', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -125,7 +117,6 @@ router.put('/update/:productId', authenticateToken, async (req, res) => {
   }
 });
 
-// Remove item from cart
 router.delete('/remove/:productId', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
@@ -150,7 +141,6 @@ router.delete('/remove/:productId', authenticateToken, async (req, res) => {
   }
 });
 
-// Clear entire cart
 router.delete('/clear', authenticateToken, async (req, res) => {
   try {
     const db = req.app.locals.db;
