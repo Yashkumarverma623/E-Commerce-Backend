@@ -2,18 +2,33 @@ const express = require('express');
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 require('dotenv').config();
 
-// Import route modules
-const authRoutes = require('./routes/authRoutes');
-const productRoutes = require('./routes/productRoutes');
-const cartRoutes = require('./routes/cartRoutes');
-const wishlistRoutes = require('./routes/wishlistRoutes');
-const orderRoutes = require('./routes/orderRoutes');
-const userRoutes = require('./routes/userRoutes');
+// Import route modules with absolute paths
+const authRoutes = require(path.join(__dirname, 'routes', 'authRoutes'));
+const productRoutes = require(path.join(__dirname, 'routes', 'productRoutes'));
+const cartRoutes = require(path.join(__dirname, 'routes', 'cartRoutes'));
+const wishlistRoutes = require(path.join(__dirname, 'routes', 'wishlistRoutes'));
+const orderRoutes = require(path.join(__dirname, 'routes', 'orderRoutes'));
+const userRoutes = require(path.join(__dirname, 'routes', 'userRoutes'));
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Debug: Log the current directory and check if routes exist
+console.log('Current directory:', __dirname);
+console.log('Routes directory:', path.join(__dirname, 'routes'));
+
+// Check if routes directory exists
+const fs = require('fs');
+try {
+  const routesDir = path.join(__dirname, 'routes');
+  const routeFiles = fs.readdirSync(routesDir);
+  console.log('✅ Routes directory found. Files:', routeFiles);
+} catch (error) {
+  console.error('❌ Routes directory not found:', error.message);
+}
 
 // Middleware
 app.use(cors({
@@ -106,6 +121,7 @@ const startServer = async () => {
   await connectDB();
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
+    console.log('✅ All routes loaded successfully');
   });
 };
 
