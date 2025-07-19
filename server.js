@@ -5,7 +5,6 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config();
 
-// Import route modules with absolute paths
 const authRoutes = require(path.join(__dirname, 'routes', 'authRoutes'));
 const productRoutes = require(path.join(__dirname, 'routes', 'productRoutes'));
 const cartRoutes = require(path.join(__dirname, 'routes', 'cartRoutes'));
@@ -35,11 +34,9 @@ const corsOptions = {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Debug: Log the current directory and check if routes exist
 console.log('Current directory:', __dirname);
 console.log('Routes directory:', path.join(__dirname, 'routes'));
 
-// Check if routes directory exists
 const fs = require('fs');
 try {
   const routesDir = path.join(__dirname, 'routes');
@@ -49,7 +46,6 @@ try {
   console.error('❌ Routes directory not found:', error.message);
 }
 
-// Middleware
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
@@ -57,14 +53,12 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000, 
+  max: 100
 });
 app.use(limiter);
 
-// MongoDB connection
 let db;
 let client;
 
@@ -79,10 +73,8 @@ const connectDB = async () => {
     db = client.db('ecommerce');
     console.log('✅ MongoDB connected successfully');
     
-    // Create indexes for better performance
     await createIndexes();
     
-    // Make db available to routes
     app.locals.db = db;
   } catch (error) {
     console.error('❌ MongoDB connection error:', error);
@@ -92,16 +84,13 @@ const connectDB = async () => {
 
 const createIndexes = async () => {
   try {
-    // Products indexes
     await db.collection('products').createIndex({ name: 'text', description: 'text', category: 'text' });
     await db.collection('products').createIndex({ category: 1 });
     await db.collection('products').createIndex({ price: 1 });
     await db.collection('products').createIndex({ rating: -1 });
     
-    // Users indexes
     await db.collection('users').createIndex({ email: 1 }, { unique: true });
     
-    // Orders indexes
     await db.collection('orders').createIndex({ userId: 1 });
     await db.collection('orders').createIndex({ createdAt: -1 });
     
@@ -111,7 +100,6 @@ const createIndexes = async () => {
   }
 };
 
-// Health check
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 
@@ -146,7 +134,6 @@ const startServer = async () => {
 
 startServer().catch(console.error);
 
-// Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('\n🛑 Shutting down gracefully...');
   if (client) {
